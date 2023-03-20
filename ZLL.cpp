@@ -36,6 +36,7 @@ template <typename T> bool ZLL<T>::front(const T &item){ /* Tested */
     }
     else{
         nn->next = head;
+        nn->prev = nullptr; //since this should be the first
         head->prev = nn;
         head = nn;
         return true;
@@ -53,6 +54,7 @@ template <typename T> bool ZLL<T>::back(const T &item){ /* Tested */
     }
     else{
         nn->prev = tail;
+        nn->next = nullptr; //since this should be the last node
         tail->next = nn;
         tail = nn;
         return true;
@@ -60,19 +62,69 @@ template <typename T> bool ZLL<T>::back(const T &item){ /* Tested */
     return false;
 
 }
-template <typename T> bool ZLL<T>::join(ZLL &other){ /*Tested*/
+template <typename T> bool ZLL<T>::join(ZLL<T> &other){ /*Tested*/
 
-    if(this != &other){
-        tail->next = other.head;
-        other.head->prev = tail;
-        tail = nullptr;
-        tail = other.tail;
-        other.head = nullptr;
+        if(other.isEmpty() && this->isEmpty()){ //just return true
         return true;
     }
-    else{
-        return false;
+    else if(other.isEmpty()){ //just return true
+        return true;
     }
+    else if(this->isEmpty()){ //copy head and tail over
+        head = other.head;
+        tail = other.tail;
+        other.head = nullptr;
+        other.tail = nullptr;
+        return true;
+    }
+    else if(this != &other){
+        tail->next = other.head;
+        other.head->prev = tail;
+        tail = other.tail;
+        other.head = nullptr;
+        other.tail = nullptr;
+        return true;
+    }
+    else
+        return true;
+
+
+    /*
+    // If the other list is empty, just return true.
+    if (other.head == NULL)
+    {
+        return true;
+    }
+
+    // If the other list is the same as this one, do nothing and return true.
+    if (&other == this)
+    {
+        return true;
+    }
+
+    // Join the other list onto the end of this one.
+    if (tail != NULL)
+    {
+        tail->next = other.head;
+        other.head->prev = tail;
+        tail = other.tail;
+    }
+    else
+    {
+        head = other.head;
+        tail = other.tail;
+    }
+
+    // Clear the other list.
+    other.head = NULL;
+    other.tail = NULL;
+
+    // other.empty();
+
+    return true;
+}
+*/
+    
 
 }
 template <typename T> ZLL<T> &ZLL<T>::operator+=(const ZLL<T> &other){ /*Tested*/
@@ -96,7 +148,6 @@ template <typename T> ZLL<T> &ZLL<T>::operator-=(const ZLL<T> &other){ /*Tested*
     else{
 
         T searchItem;
-        Node<T> *NodeToDelete = nullptr;
         Node<T> *currOther = other.head;
         Node<T> *curr = nullptr;
         while(currOther){
@@ -105,25 +156,19 @@ template <typename T> ZLL<T> &ZLL<T>::operator-=(const ZLL<T> &other){ /*Tested*
             curr = head;
             while(curr){
                 if(curr->item == searchItem){
-                    if(curr->prev == nullptr){//were removing from beginning
-                        NodeToDelete = curr;
-                        head = head->next; //move head over one
-                        head->prev = nullptr; //head->prev should always point to null
-                        curr = head; //set current node = head again
+                    Node<T> *NodeToDelete = curr; //save node
+                    curr = curr->next; //advance curr
+                    if (NodeToDelete == head) //deleted from the front
+                        head = curr;
+                    else if (NodeToDelete == tail){ //deleted from the back
+                        tail = NodeToDelete->prev;
+                        tail->next = nullptr;
                     }
-                    else if(curr->next == nullptr){//were removing from the end
-                        NodeToDelete = curr;
-                        tail = tail->prev; //move tail left one 
-                        tail->next = nullptr; //tail->next should always point to null
-                        curr = tail; 
-                    }
-                    else{
-                        Node<T> *previous = curr->prev;
-                        Node<T> *suc = curr->next;
-                        previous->next = curr->next;
-                        suc->prev = previous;
-                        NodeToDelete = curr;
-                        curr = curr->next;
+                    else{ //anywhere else, need prev and suc node
+                        Node<T> *previous = NodeToDelete->prev;
+                        Node<T> *suc = NodeToDelete->next;
+                        previous->next = NodeToDelete->next;
+                        suc->prev = NodeToDelete->prev;
                     }
                     delete NodeToDelete;
                 }
@@ -136,36 +181,28 @@ template <typename T> ZLL<T> &ZLL<T>::operator-=(const ZLL<T> &other){ /*Tested*
     }
     return *this;
 }
-template <typename T> int ZLL<T>::removeZany(){ /*Tested*/
-
-    Node<T> *NodeToDelete = nullptr;
-    Node<T> *curr = head;
+template <typename T> int ZLL<T>::removeZany()
+{
     int count = 0;
-    while(curr){
-        if(isZany(curr->item)){
-            if(curr->prev == nullptr){//were removing from beginning
-                NodeToDelete = curr;
-                head = head->next; //move head over one
-                head->prev = nullptr; //head->prev should always point to null
-                curr = head; //set current node = head again
-                delete NodeToDelete; 
+    Node<T> *curr = head;
+    while (curr)
+    {
+        if (isZany(curr->item)){
+            Node<T> *NodeToDelete = curr; //save node
+            curr = curr->next; //advance curr
+            if (NodeToDelete == head) //deleted from the front
+                head = curr;
+            else if (NodeToDelete == tail){ //deleted from the back
+                tail = NodeToDelete->prev;
+                tail->next = nullptr;
             }
-            else if(curr->next == nullptr){//were removing from the end
-                NodeToDelete = curr;
-                tail = tail->prev; //move tail left one 
-                tail->next = nullptr; //tail->next should always point to null
-                curr = tail; 
-                delete NodeToDelete;
+            else{ //anywhere else, need prev and suc node
+                Node<T> *previous = NodeToDelete->prev;
+                Node<T> *suc = NodeToDelete->next;
+                previous->next = NodeToDelete->next;
+                suc->prev = NodeToDelete->prev;
             }
-            else{
-                Node<T> *previous = curr->prev;
-                Node<T> *suc = curr->next;
-                previous->next = curr->next;
-                suc->prev = previous;
-                NodeToDelete = curr;
-                curr = curr->next;
-                delete NodeToDelete;
-            }
+            delete NodeToDelete;
             count++;
         }
         else
@@ -173,70 +210,78 @@ template <typename T> int ZLL<T>::removeZany(){ /*Tested*/
     }
     return count;
 }
-template <typename T> int ZLL<T>::removeNonZany(){ /*Tested*/
-
-    Node<T> *NodeToDelete = nullptr;
-    Node<T> *curr = head;
+template <typename T> int ZLL<T>::removeNonZany() //basically same as remove zany
+{
     int count = 0;
-    while(curr){
-        if(!isZany(curr->item)){
-            if(curr->prev == nullptr){//were removing from beginning
-                NodeToDelete = curr;
-                head = head->next; //move head over one
-                head->prev = nullptr; //head->prev should always point to null
-                curr = head; //set current node = head again
-                delete NodeToDelete; 
-            }
-            else if(curr->next == nullptr){//were removing from the end
-                NodeToDelete = curr;
-                tail = tail->prev; //move tail left one 
-                tail->next = nullptr; //tail->next should always point to null
-                curr = tail; 
-                delete NodeToDelete;
+    Node<T> *curr = head;
+    while (curr)
+    {
+        if (!isZany(curr->item))
+        {
+            Node<T> *NodeToDelete = curr;
+            curr = curr->next;
+            if (NodeToDelete == head)
+                head = curr;
+
+            else if (NodeToDelete == tail){
+                tail = NodeToDelete->prev;
+                tail->next = nullptr;
             }
             else{
-                Node<T> *previous = curr->prev;
-                Node<T> *suc = curr->next;
-                previous->next = curr->next;
-                suc->prev = previous;
-                NodeToDelete = curr;
-                curr = curr->next;
-                delete NodeToDelete;
+                Node<T> *previous = NodeToDelete->prev;
+                Node<T> *suc = NodeToDelete->next;
+                previous->next = NodeToDelete->next;
+                suc->prev = NodeToDelete->prev;
             }
+            delete NodeToDelete;
             count++;
         }
         else
             curr = curr->next;
     }
     return count;
+}
+template <typename T> bool ZLL<T>::isEmpty(){
+    if(head == nullptr)
+        return true;
+    else 
+        return false;
+}
+template <typename T> bool ZLL<T>::empty(){
+    Node<T> *curr = head;
+    while(curr){
+        Node<T> *NodeToDelete = curr;
+        curr = curr->next;
+        delete NodeToDelete;
+    }
+    head = nullptr;
+    tail = nullptr;
+    return true;
 }
 template <typename T> bool ZLL<T>::promoteZany(){ /*Tested*/
 
     Node<T> *curr = head;
-    Node<T> *NodeToMove = nullptr;
+    Node<T> *promote = nullptr;
     while(curr){
 
         if(isZany(curr->item)){
-            if(curr->prev == nullptr){//were removing from beginning dont need to do anything
-                curr = curr->next;
+            promote = curr; //node to promote
+            curr = curr->next;
+            if (promote == head) //deleted from the front
+                continue;
+            else if (promote == tail){ //deleted from the back
+                tail = promote->prev;
+                tail->next = nullptr;
+                front(promote->item);
+                delete promote;
             }
-            else if(curr->next == nullptr){//were removing from the end
-                NodeToMove = curr;
-                tail = tail->prev; //move tail left one 
-                tail->next = nullptr; //tail->next should always point to null
-                curr = tail; 
-                front(NodeToMove->item); //move to front, this makes a new node but its okay because we delete the old one
-                delete NodeToMove;
-            }
-            else{
-                Node<T> *previous = curr->prev;
-                Node<T> *suc = curr->next;
-                previous->next = curr->next;
-                suc->prev = previous;
-                NodeToMove = curr;
-                curr = curr->next;
-                front(NodeToMove->item); //move to front, this makes a new node but its okay because we delete the old one
-                delete NodeToMove;
+            else{ //anywhere else, need prev and suc node
+                Node<T> *previous = promote->prev;
+                Node<T> *suc = promote->next;
+                previous->next = promote->next;
+                suc->prev = promote->prev;
+                front(promote->item);
+                delete promote;
             }
         }
         else{

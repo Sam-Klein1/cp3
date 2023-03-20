@@ -1,6 +1,8 @@
+#ifndef _ZANY_
+#define _ZANY_
+
 #include <string>
 
-bool isZany(int a) {return (a % 2);}
-bool isZany(std::string a) {
-   return ((a.length() > 0) && isupper(a[0]));
-}
+bool isZany(int a);
+bool isZany(std::string a);
+#endif

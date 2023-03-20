@@ -1,3 +1,6 @@
+#ifndef _ZLL_
+#define _ZLL_
+
 template <typename T>
 class Node{
 
@@ -23,6 +26,8 @@ class ZLL{
     ZLL<T> &operator-=(const ZLL<T> &other);
     int removeZany();
     int removeNonZany();
+    bool isEmpty();
+    bool empty();
     bool promoteZany();
     bool start();
     bool done();
@@ -39,3 +44,5 @@ class ZLL{
 };
 
 #include "ZLL.cpp"
+
+#endif

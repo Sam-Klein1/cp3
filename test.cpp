@@ -1,19 +1,34 @@
 #include "ZLL.h"
 #include <iostream>
+#include <string>
 int main()
 {
 
-    ZLL<int> myzll1;
-    myzll1.back(1);
-    myzll1.back(2);
-    myzll1.back(3);
+    ZLL<int> list1;
+    ZLL<int> list2;
 
-    ZLL<int> myzll2;
-    myzll2.back(1);
-    myzll2.back(3);
-    myzll2.back(6);
+    std::cout << "==================1===========================" << std::endl;
+    list1.join(list2); //both are empty
+    list1.print();
+    std::cout << "==================2===========================" << std::endl;
+    list2.back(4); //this is empty 
+    list2.front(6);
+    list2.front(5);
+    list2.print();
+    list1.join(list2);
+    list1.print();
 
-    myzll1 -= myzll2;
-
+    std::cout << "==================3===========================" << std::endl;
+    list1.front(1);
+    list1.front(2);
+    list1.front(3);
+    list2.back(4); 
+    list2.front(6);
+    list2.front(5);
+    list1.print();
+    list2.print();
+    list1.join(list2);
+    list1.print();
+        
 
 }
