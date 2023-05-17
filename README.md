@@ -1,3 +1,3 @@
 # cp3
 
-A custom doubly-linked list!
+A custom templated doubly-linked list!
